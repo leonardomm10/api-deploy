@@ -9,7 +9,9 @@ COPY . .
 
 # Install dependencies
 RUN ls -l
-RUN pip install -r /app/requirements.txt
+RUN ls -l app/
+RUN ls -l /app/
+RUN pip install -r app/requirements.txt
 
 # Start gunicor web server on port 5000
 CMD ["gunicorn", "--log-level", "debug", "--bind", "0.0.0.0:5000", "api:app"]
