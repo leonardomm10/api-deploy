@@ -5,8 +5,8 @@ FROM python:3.7.4
 WORKDIR /app
 
 # Install dependencies
-RUN ls -l
 COPY requirements.txt requirements.txt
+RUN ls -l
 RUN pip install -r app/requirements.txt
 RUN ls -l
 
