@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-configmap
+data:
+  default.conf: |
+    # Nginx configuration
+    server {
+      listen       8000 default_server;
+      server_name  _;
+
+      location / {
+          proxy_pass http://api-service:5000;
+      }
+    }
