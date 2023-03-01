@@ -8,9 +8,6 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies
-RUN ls -l
-RUN ls -l app/
-RUN ls -l /app/
 RUN pip install -r app/requirements.txt
 
 # Start gunicor web server on port 5000
