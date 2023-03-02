@@ -1,5 +1,5 @@
 resource "digitalocean_kubernetes_cluster" "k8s" {
-  name    = "k8s"
+  name    = "k8s-python-api"
   region  = var.region
   version = "1.25.4-do.0"
   tags    = ["terraform", "k8s"]
