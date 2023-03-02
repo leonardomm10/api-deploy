@@ -28,7 +28,7 @@ jobs:
         docker build -f ./Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/python-api .
       
     - name: Push the Docker image
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/python-api
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/python-api
 
     # - name: Install doctl
     #   uses: digitalocean/action-doctl@v2
