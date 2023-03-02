@@ -19,7 +19,7 @@ def api_home():
     return jsonify(response), 200
 
 @app.route('/test')
-def api_home():
+def api_test():
     message = 'voce chegou na rota de teste'
     response = {
             'status': 'OK',
