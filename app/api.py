@@ -27,6 +27,15 @@ def api_test():
             }
     return jsonify(response), 200
 
+@app.route('/test2')
+def api_test2():
+    message = 'voce chegou na rota de teste'
+    response = {
+            'status': 'OK',
+            'message': message,
+            }
+    return jsonify(response), 200
+
 
 @app.route('/api/comment/new', methods=['POST'])
 def api_comment_new():
