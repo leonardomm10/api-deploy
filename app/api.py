@@ -9,6 +9,15 @@ app.debug = True
 
 comments = {}
 
+@app.route('/api/comment/list/<content_id>')
+def api_home():
+    message = 'test'
+    response = {
+            'status': 'OK',
+            'message': message,
+            }
+    return jsonify(response), 200
+
 
 @app.route('/api/comment/new', methods=['POST'])
 def api_comment_new():
