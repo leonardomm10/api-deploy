@@ -18,6 +18,15 @@ def api_home():
             }
     return jsonify(response), 200
 
+@app.route('/home')
+def api_home2():
+    message = 'test2'
+    response = {
+            'status': 'OK',
+            'message': message,
+            }
+    return jsonify(response), 200
+
 
 @app.route('/api/comment/new', methods=['POST'])
 def api_comment_new():
