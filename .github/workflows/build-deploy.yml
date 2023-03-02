@@ -23,7 +23,7 @@ jobs:
         ls app/
         cd app/
         pwd
-        docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/python-api
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/python-api .
     
     - name: Push the Docker image
       run: docker push ${{ secrets.DOCKER_USERNAME }}/python-api
