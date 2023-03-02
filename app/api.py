@@ -9,7 +9,7 @@ app.debug = True
 
 comments = {}
 
-@app.route('/api/comment/list/<content_id>')
+@app.route('/')
 def api_home():
     message = 'test'
     response = {
