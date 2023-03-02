@@ -3,6 +3,9 @@ name: Build and Deploy API
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - '.github/workflows/**'
+      - 'app/**'
 
 jobs:
   build:
@@ -32,7 +35,7 @@ jobs:
       with:
         token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-    - name: Save DigitalOcean kubeconfig with short-lived credentials
+    - name: Save DigitalOcean kubeconfig
       run: doctl kubernetes cluster kubeconfig save k8s-python-api
 
     - name: Deploy api to DigitalOcean Kubernetes
