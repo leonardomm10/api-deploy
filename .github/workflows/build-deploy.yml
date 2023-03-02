@@ -23,6 +23,7 @@ jobs:
 
     - name: Change folder
       run: |
+        ls
         cd app/
         ls app/
       
