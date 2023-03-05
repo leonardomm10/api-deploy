@@ -1,0 +1,53 @@
+---
+- hosts: localhost
+  gather_facts: true
+
+  tasks:
+    - name: Remove web
+      kubernetes.core.k8s:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: absent
+        src: "{{ item }}"
+        namespace: default
+      with_items:
+        - "../k8s/web/configmap.yaml"
+        - "../k8s/web/deployment.yaml"
+        - "../k8s/web/service.yaml"
+
+    - name: Remove api
+      kubernetes.core.k8s:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: absent
+        src: "{{ item }}"
+        namespace: default
+      with_items:
+        - "../k8s/api/deployment.yaml"
+        - "../k8s/api/service.yaml"
+
+    - name: Remove namespace
+      kubernetes.core.k8s:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: absent
+        name: monitoring
+        api_version: v1
+        kind: Namespace
+
+    - name: Remove Metrics Server
+      kubernetes.core.helm:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: absent
+        name: metrics-server
+        chart_ref: metrics-server/metrics-server
+        release_namespace: monitoring
+        purge: false
+
+    - name: Deploy Prometheus
+      kubernetes.core.helm:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: absent
+        name: prometheus
+        chart_ref: prometheus-community/prometheus
+        release_namespace: monitoring
+        values_files:
+          - monitoring/prometheus-values.yaml
+        purge: false

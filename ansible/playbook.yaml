@@ -1,0 +1,88 @@
+---
+- hosts: localhost
+  gather_facts: true
+
+  tasks:
+    - name: Install pre-requisites
+      pip:
+        name:
+          - helm
+          - pyyaml
+          - kubernetes 
+
+    - name: Deploy web
+      kubernetes.core.k8s:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: present
+        src: "{{ item }}"
+        namespace: default
+      with_items:
+        - "../k8s/web/configmap.yaml"
+        - "../k8s/web/deployment.yaml"
+        - "../k8s/web/service.yaml"
+
+    - name: Deploy api
+      kubernetes.core.k8s:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: present
+        src: "{{ item }}"
+        namespace: default
+      with_items:
+        - "../k8s/api/deployment.yaml"
+        - "../k8s/api/service.yaml"
+
+    - name: Create namespace
+      kubernetes.core.k8s:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: present
+        name: monitoring
+        api_version: v1
+        kind: Namespace
+
+    - name: Deploy Metrics Server
+      kubernetes.core.helm:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: present
+        name: metrics-server
+        chart_ref: metrics-server/metrics-server
+        release_namespace: monitoring
+
+    - name: Deploy Prometheus
+      kubernetes.core.helm:
+        kubeconfig: ../terraform/kube_config.yaml
+        state: present
+        name: prometheus
+        chart_ref: prometheus-community/prometheus
+        release_namespace: monitoring
+        values_files:
+          - monitoring/prometheus-values.yaml
+
+    - name: Get an existing Service object
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Service
+        name: web-service
+        namespace: default
+      register: web_service
+      until: web_service.resources[0].status.loadBalancer
+      retries: 5
+      delay: 60
+
+    - name: Insert data on api
+      uri:
+        url: 'http://{{ web_service.resources[0].status.loadBalancer.ingress[0].ip }}:8000/api/comment/new'
+        method: POST
+        body:
+          email: "{{ item.email }}"
+          comment: "{{ item.comment }}"
+          content_id: "{{ item.content_id }}"
+        body_format: json
+        headers:
+          Content-Type: application/json
+      with_items:
+        - {email: 'alice@example.com', comment: 'first post!', content_id: 1 }
+        - {email: 'alice@example.com', comment: 'ok, now I am gonna say something more useful', content_id: 1 }
+        - {email: 'bob@example.com', comment: 'I agree', content_id: 1 }
+        - {email: 'bob@example.com', comment: 'I guess this is a good thing', content_id: 2 }
+        - {email: 'charlie@example.com', comment: 'Indeed, dear Bob, I believe so as well', content_id: 2 }
+        - {email: 'eve@example.com', comment: 'Nah, you both are wrong', content_id: 2 }
