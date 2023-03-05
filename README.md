@@ -1,65 +1,51 @@
-# Considerações Gerais
+## Requirements
+- Python
+- Pip
+- Digital Ocean
+- Terraform
+- Ansible
+- Kubernetes
 
-Você deverá usar este repositório como o repo principal do projeto, i.e., todos os seus commits devem estar registrados aqui, pois queremos ver como você trabalha.
+## Terraform
 
-A escolha de tecnologias é livre para a resolução do problema. Utilize os componentes e serviços que melhor domina pois a apresentação na entrega do desafio deverá ser como uma aula em que você explica em detalhes cada decisão que tomou.
+Create a cluster kubernetes on Digital Ocean with size 2gb RAM and 1 CPU.
 
-Registre tudo: testes que foram executados, ideias que gostaria de implementar se tivesse tempo (explique como você as resolveria, se houvesse tempo), decisões que foram tomadas e seus porquês, arquiteturas que foram testadas e os motivos de terem sido modificadas ou abandonadas. Crie um arquivo COMMENTS.md ou HISTORY.md no repositório para registrar essas reflexões e decisões.
+1 - Create a .tfvars file for your Digital Ocean token inside directory terraform/:
 
-
-# O Problema
-
-O desafio que você deve resolver é a implantação da aplicação de Comentários em versão API (backend) usando ferramentas open source da sua preferência.
-
-Você precisa criar o ambiente de execução desta API com o maior número de passos automatizados possível, inclusive a esteira de deploy.
-
-A aplicação será uma API REST que está disponível neste repositório. Através dela os internautas enviam comentários em texto de uma máteria e acompanham o que outras pessoas estão falando sobre o assunto em destaque. O funcionamento básico da API consiste em uma rota para inserção dos comentários e uma rota para listagem.
-
-Os comandos de interação com a API são os seguintes:
-
-* Start da app
+terraform.tfvars:
+```
+do_token = "TOKEN"
+```
+2 - Execute inside directory terraform/:
 
 ```
-cd app
-gunicorn --log-level debug api:app
+terraform apply
+cat kube_config.yaml > ~/.kube/config
 ```
 
-* Criando e listando comentários por matéria
-
+To delete the cluster, run:
 ```
-# matéria 1
-curl -sv localhost:8000/api/comment/new -X POST -H 'Content-Type: application/json' -d '{"email":"alice@example.com","comment":"first post!","content_id":1}'
-curl -sv localhost:8000/api/comment/new -X POST -H 'Content-Type: application/json' -d '{"email":"alice@example.com","comment":"ok, now I am gonna say something more useful","content_id":1}'
-curl -sv localhost:8000/api/comment/new -X POST -H 'Content-Type: application/json' -d '{"email":"bob@example.com","comment":"I agree","content_id":1}'
-
-# matéria 2
-curl -sv localhost:8000/api/comment/new -X POST -H 'Content-Type: application/json' -d '{"email":"bob@example.com","comment":"I guess this is a good thing","content_id":2}'
-curl -sv localhost:8000/api/comment/new -X POST -H 'Content-Type: application/json' -d '{"email":"charlie@example.com","comment":"Indeed, dear Bob, I believe so as well","content_id":2}'
-curl -sv localhost:8000/api/comment/new -X POST -H 'Content-Type: application/json' -d '{"email":"eve@example.com","comment":"Nah, you both are wrong","content_id":2}'
-
-# listagem matéria 1
-curl -sv localhost:8000/api/comment/list/1
-
-# listagem matéria 2
-curl -sv localhost:8000/api/comment/list/2
+terraform destroy
 ```
 
+## Ansible
 
-# O que será avaliado na sua solução?
+1 - The playbook "playbook.yaml" will apply the kubernets manifests on the cluster, populate the api and install metrics server and prometheus on the cluster using helm.
 
-* Automação da infra, provisionamento dos hosts (IaaS)
+Run:
+```
+ansible-playbook ansible/playbook.yaml
+```
 
-* Automação de setup e configuração dos hosts (IaC)
+At the end of the execution, the ip address of the api will be displayed.
 
-* Pipeline de deploy automatizado
+2 - The playbook "remove.yaml" will remove the manifests from kubernetes and uninstall helm and prometheus from the cluster.
 
-* Monitoramento dos serviços e métricas da aplicação
+Run:
+```
+ansible-playbook ansible/remove.yaml
+```
 
-
-# Dicas
-
-Use ferramentas e bibliotecas open source, mas documente as decisões e porquês;
-
-Automatize o máximo possível;
-
-Em caso de dúvidas, pergunte.
+## Accessing api
+https://ip_adress:8000/api/comment/list/1
+https://ip_adress:8000/api/comment/list/2
