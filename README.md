@@ -20,7 +20,6 @@ do_token = "TOKEN"
 
 ```
 terraform apply
-cat kube_config.yaml > ~/.kube/config
 ```
 
 To delete the cluster, run:
@@ -47,5 +46,5 @@ ansible-playbook ansible/remove.yaml
 ```
 
 ## Accessing api
-https://ip_adress:8000/api/comment/list/1
-https://ip_adress:8000/api/comment/list/2
+https://ip_adress:8000/api/comment/list/1  
+https://ip_adress:8000/api/comment/list/2  
