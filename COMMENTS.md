@@ -1,10 +1,10 @@
 ## Ferramentas Utilizadas  
 
 - **Digital Ocean**  
-  Utilizei a Digital Ocean pois é uma cloud que ja tenho conhecimento e ja estava fazendo alguns testes com kubernetes e terraform.  
+  Utilizei a Digital Ocean pois é uma cloud que já tenho conhecimento e já estava fazendo alguns testes com kubernetes e terraform.  
   
 - **Terraform**  
-  Utilzando para subir o ambiente com o cluster Kubernetes.  
+  Utilzado para subir o ambiente com o cluster Kubernetes.  
 
 - **Kubernetes**  
   Utilizado para subir a api. 
@@ -21,11 +21,11 @@
 
 ## Funcionamento  
 
-**1.** O Terraform cria um cluster Kubernetes na Digital Ocean com apenas 1 node de 2GB de Ram e 1 CPU, apos a criação ele salva o arquivo de configuração do Kubernetes dentro de um arquivo.  
+**1.** O Terraform cria um cluster Kubernetes na Digital Ocean com apenas 1 node de 2GB de Ram e 1 CPU, após a criação ele salva o arquivo de configuração do Kubernetes dentro de um arquivo.  
 
 **2.** Os manifestos do Kubernetes criam um deployment e service para o servidor Web (nginx) que faz um proxy para o serviço da API que possui um deployment com a Imagem da API em python no Docker Hub.  
 
-**3.** Foram criados 2 playbooks com o ansible para automatizar alguns tarefas, entre elas:  
+**3.** Foram criados 2 playbooks com o ansible para automatizar algumas tarefas, entre elas:  
 - Aplicar os manifestos do Kubernetes no cluster.
 - Configurar e Instalar o Metrics Server e Prometheus no cluster utilizando Helm.
 - Fazer as requisiçoes POST para a API.
@@ -37,4 +37,4 @@
 - Faz o push da imagem no DockerHub.
 - Aplica as alterações dentro do cluster Kubernetes.  
 
-**5.** Com prometheus tive dificuldade para configurar as métricas, então ele só esta pegando as métricas do cluster e não da API.
+**5.** Com prometheus tive dificuldade para configurar as métricas, então ele só está monitorando as métricas do cluster e não da API.
