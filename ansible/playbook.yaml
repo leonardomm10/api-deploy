@@ -1,6 +1,10 @@
 ---
 - hosts: localhost
   gather_facts: true
+  become: true
+
+  vars:
+    kube_config: "../terraform/kube_config.yaml"
 
   tasks:
     - name: Install pre-requisites
@@ -12,7 +16,7 @@
 
     - name: Deploy web
       kubernetes.core.k8s:
-        kubeconfig: ../terraform/kube_config.yaml
+        kubeconfig: "{{ kube_config }}"
         state: present
         src: "{{ item }}"
         namespace: default
@@ -23,7 +27,7 @@
 
     - name: Deploy api
       kubernetes.core.k8s:
-        kubeconfig: ../terraform/kube_config.yaml
+        kubeconfig: "{{ kube_config }}"
         state: present
         src: "{{ item }}"
         namespace: default
@@ -33,23 +37,33 @@
 
     - name: Create namespace
       kubernetes.core.k8s:
-        kubeconfig: ../terraform/kube_config.yaml
+        kubeconfig: "{{ kube_config }}"
         state: present
         name: monitoring
         api_version: v1
         kind: Namespace
 
+    - name: Metrics Server repo
+      kubernetes.core.helm_repository:
+        name: metrics-server
+        repo_url: "https://kubernetes-sigs.github.io/metrics-server"
+
     - name: Deploy Metrics Server
       kubernetes.core.helm:
-        kubeconfig: ../terraform/kube_config.yaml
+        kubeconfig: "{{ kube_config }}"
         state: present
         name: metrics-server
         chart_ref: metrics-server/metrics-server
         release_namespace: monitoring
 
+    - name: Prometheus repo
+      kubernetes.core.helm_repository:
+        name: prometheus-community
+        repo_url: "https://prometheus-community.github.io/helm-charts"
+
     - name: Deploy Prometheus
       kubernetes.core.helm:
-        kubeconfig: ../terraform/kube_config.yaml
+        kubeconfig: "{{ kube_config }}"
         state: present
         name: prometheus
         chart_ref: prometheus-community/prometheus
@@ -57,14 +71,27 @@
         values_files:
           - monitoring/prometheus-values.yaml
 
-    - name: Get an existing Service object
+    - name: Get info about web service
       kubernetes.core.k8s_info:
+        kubeconfig: "{{ kube_config }}"
         api_version: v1
         kind: Service
         name: web-service
         namespace: default
       register: web_service
       until: web_service.resources[0].status.loadBalancer
+      retries: 5
+      delay: 60
+
+    - name: Get info about prometheus service 
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ kube_config }}"
+        api_version: v1
+        kind: Service
+        name: prometheus-server
+        namespace: monitoring
+      register: prometheus_service
+      until: prometheus_service.resources[0].status.loadBalancer
       retries: 5
       delay: 60
 
@@ -86,3 +113,10 @@
         - {email: 'bob@example.com', comment: 'I guess this is a good thing', content_id: 2 }
         - {email: 'charlie@example.com', comment: 'Indeed, dear Bob, I believe so as well', content_id: 2 }
         - {email: 'eve@example.com', comment: 'Nah, you both are wrong', content_id: 2 }
+
+    - name: Print URLs
+      debug:
+        msg: 
+          - "API:        http://{{ web_service.resources[0].status.loadBalancer.ingress[0].ip }}:8000/api/comment/list/1"
+          - "API:        http://{{ web_service.resources[0].status.loadBalancer.ingress[0].ip }}:8000/api/comment/list/2"
+          - "Prometheus: http://{{ prometheus_service.resources[0].status.loadBalancer.ingress[0].ip }}"
