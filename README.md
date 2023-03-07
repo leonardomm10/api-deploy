@@ -1,10 +1,11 @@
 ## Requirements
 - Python
 - Pip
-- Digital Ocean
 - Terraform
-- Ansible
 - Kubernetes
+- Helm
+- Ansible
+- Ansible galaxy collection kubernetes.core
 
 ## Terraform
 
